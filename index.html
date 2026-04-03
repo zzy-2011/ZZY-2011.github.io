@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>中考志愿评估</title>
+<title>广州中考志愿评估（含校区）</title>
 <style>
 *{box-sizing:border-box;font-family:system-ui, sans-serif}
 body{margin:0;padding:16px;background:#f4f7fa;color:#222}
@@ -16,13 +16,14 @@ button{background:#007aff;color:white;border:none;font-weight:bold}
 .danger{color:#ff9500}
 .fail{color:#ff3b30}
 .sec{margin-top:12px;padding-top:12px;border-top:1px solid #eee}
+.title{font-weight:bold;font-size:17px;margin-bottom:6px}
 </style>
 </head>
 
 <body>
 <div class="card">
 <h1>广州中考志愿评估</h1>
-<p style="text-align:center">810分制 · 梯度保护</p>
+<p style="text-align:center">810分制 · 含所有校区分校</p>
 
 <select id="area">
 <option value="番禺区">番禺区</option>
@@ -52,71 +53,135 @@ const GRADES = [
 ["第一梯度",707],["第二梯度",667],["第三梯度",627],["第四梯度",587],["第五梯度",547],["第六梯度",507],["普高线",487]
 ];
 
-const SCHOOLS = {
+// 🏫 省市属 · 所有校区（含分校，独立招生）
+const PROVINCE_SCHOOLS = [
+// 华附
+["华南师大附中（石牌校区）",740],
+["华南师大附中（知识城校区）",727],
+// 省实
+["广东实验中学（荔湾校区）",727],
+["广东实验中学（白云校区）",729],
+// 广雅
+["广雅中学（荔湾校区）",719],
+["广雅中学（花都校区）",718],
+// 执信
+["执信中学（执信路校区）",723],
+["执信中学（天河校区）",720],
+// 二中
+["广州二中（应元本部）",724],
+["广州二中（南沙天元学校）",663],
+// 六中
+["广州六中（海珠校区）",712],
+["广州六中（从化校区）",662],
+// 广大附
+["广大附中（大学城本部）",732],
+["广大附中（增城实验）",627],
+["广大附中（南沙实验）",682],
+// 铁一
+["铁一中学（越秀校区）",717],
+["铁一中学（番禺校区）",708],
+["铁一中学（白云校区）",707],
+// 其他
+["广州外国语学校",736],
+["华侨中学",662],
+["协和学校",650]
+];
+
+// 各区属学校（前6所）
+const DISTRICT_SCHOOLS = {
 "番禺区":[
-["仲元中学",702],["番禺中学",667],["铁一（番禺）",710],["象贤中学",651],["番禺实验中学",627],["禺山高级中学",621]
+["仲元中学",702],["番禺中学",667],["铁一（番禺）",708],["象贤中学",651],["番禺实验中学",627],["禺山高级中学",621]
 ],
 "越秀区":[
-["华附",740],["省实",727],["执信",723],["二中",724],["铁一",717],["十六中",707]
+["七中",680],["十六中",707],["三中",678],["培正",645],["十七中",630],["育才",625]
 ],
 "天河区":[
-["天外",714],["广州中学",703],["奥林匹克",663],["75中",653],["89中",642],["113中",638]
+["广州中学",703],["天外",714],["奥林匹克",663],["75中",653],["89中",642],["113中",638]
 ],
 "荔湾区":[
-["广雅",719],["真光",699],["一中",665],["四中",653],["西关外国语",655]
+["真光中学",699],["一中",665],["四中",653],["西关外国语",655],["协和",650],["流花中学",600]
 ],
 "海珠区":[
-["六中",712],["五中",711],["南武",699],["海实",673],["97中",647]
+["五中",711],["南武",699],["海实",673],["97中",647],["41中",630],["景中实验",610]
 ],
 "黄埔区":[
-["广大附中",732],["玉岩",678],["科学城",648],["广州实验",672]
+["玉岩中学",678],["科学城中学",648],["广州实验",672],["开元学校",625],["北师大广实",660],["新港中学",600]
 ],
 "白云区":[
-["培英",707],["65中",636],["白云中学",627]
+["培英中学",707],["65中",636],["白云中学",627],["大同中学",610],["广外实验",610],["太和中学",580]
 ],
 "花都区":[
-["广雅花都",718],["秀全",668],["邝维煜",646]
+["秀全中学",668],["邝维煜",646],["新华中学",600],["圆玄中学",585],["花东中学",560],["狮岭中学",550]
 ],
 "南沙区":[
-["广外",736],["二中天元",663],["广大附中南沙",682],["南沙一中",627]
+["二中天元",663],["广大附中南沙",682],["南沙一中",627],["东涌中学",595],["大岗中学",570],["麒麟中学",560]
 ],
 "增城区":[
-["增城中学",665],["郑中钧",627],["新塘中学",624]
+["增城中学",665],["郑中钧",627],["新塘中学",624],["仙村中学",580],["派潭中学",570],["荔城中学",590]
 ],
 "从化区":[
-["从化中学",609],["六中从化",677],["从化二中",608]
+["从化中学",609],["六中从化",662],["从化二中",608],["太平中学",570],["良口中学",550],["鳌头中学",560]
 ]
 };
 
-function getG(s){
-for(let [n,l] of GRADES) if(s>=l) return n; return "低于普高线";
+function getG(score){
+    for(let [name,line] of GRADES){
+        if(score >= line) return name;
+    }
+    return "低于普高线";
 }
 
 function go(){
-let a = document.getElementById("area").value;
-let e1 = +document.getElementById("exam1").value;
-let e2 = +document.getElementById("exam2").value;
-let score = Math.round((e1*0.4+e2*0.6)*10)/10;
-let g = getG(score);
+    let area = document.getElementById("area").value;
+    let e1 = Number(document.getElementById("exam1").value);
+    let e2 = Number(document.getElementById("exam2").value);
+    let score = Math.round((e1*0.4 + e2*0.6)*10)/10;
+    let stuGrade = getG(score);
 
-let list = SCHOOLS[a].slice(0,6);
-let s=[],d=[],f=[];
+    // 评估区属
+    let distList = DISTRICT_SCHOOLS[area].slice(0,6);
+    let dSafe=[],dDanger=[],dFail=[];
+    for(let [name,line] of distList){
+        let df = score - line;
+        let txt = `• ${name}（${getG(line)}）线${line} → ${df>=0?"超"+df.toFixed(1):"差"+(-df).toFixed(1)}分`;
+        if(df>=0) dSafe.push(txt);
+        else if(df>=-15) dDanger.push(txt);
+        else dFail.push(txt);
+    }
 
-for(let [n,l] of list){
-let df = score-l;
-let t = `• ${n}（${getG(l)}）线${l} → ${df>=0?"超"+df.toFixed(1):"差"+(-df).toFixed(1)}分`;
-if(df>=0)s.push(t);
-else if(df>=-15)d.push(t);
-else f.push(t);
-}
+    // 评估省市属（所有校区）
+    let provList = PROVINCE_SCHOOLS;
+    let pSafe=[],pDanger=[],pFail=[];
+    for(let [name,line] of provList){
+        let df = score - line;
+        let txt = `• ${name}（${getG(line)}）线${line} → ${df>=0?"超"+df.toFixed(1):"差"+(-df).toFixed(1)}分`;
+        if(df>=0) pSafe.push(txt);
+        else if(df>=-15) pDanger.push(txt);
+        else pFail.push(txt);
+    }
 
-let out = `<b>优先区：${a}</b><br>预估分：${score} 分<br>梯度：${g}<br>`;
-if(s.length)out+=`<div class=sec class=safe><b>✅ 稳妥保底</b><br>${s.join('<br>')}</div>`;
-if(d.length)out+=`<div class=sec class=danger><b>⚠️ 适合冲刺</b><br>${d.join('<br>')}</div>`;
-if(f.length)out+=`<div class=sec class=fail><b>❌ 风险较大</b><br>${f.join('<br>')}</div>`;
+    // 输出
+    let out = `
+<b>📊 你的成绩</b><br>
+预估总分：${score} 分<br>
+所属梯度：${stuGrade}<br>
+<hr style="margin:12px 0;border-color:#eee">
 
-document.getElementById("output").innerHTML=out;
-document.getElementById("result").style.display="block";
+<div class=title>🏫 ${area} 区属（前6所）</div>
+    `;
+
+    if(dSafe.length) out+=`<div class=sec safe><b>✅ 稳妥保底</b><br>${dSafe.join('<br>')}</div>`;
+    if(dDanger.length) out+=`<div class=sec danger><b>⚠️ 适合冲刺</b><br>${dDanger.join('<br>')}</div>`;
+    if(dFail.length) out+=`<div class=sec fail><b>❌ 风险较大</b><br>${dFail.join('<br>')}</div>`;
+
+    out+=`<hr style="margin:12px 0;border-color:#eee"><div class=title>🌟 省市属 · 全校区（含分校）</div>`;
+
+    if(pSafe.length) out+=`<div class=sec safe><b>✅ 稳妥保底</b><br>${pSafe.join('<br>')}</div>`;
+    if(pDanger.length) out+=`<div class=sec danger><b>⚠️ 适合冲刺</b><br>${pDanger.join('<br>')}</div>`;
+    if(pFail.length) out+=`<div class=sec fail><b>❌ 风险较大</b><br>${pFail.join('<br>')}</div>`;
+
+    document.getElementById("output").innerHTML = out;
+    document.getElementById("result").style.display = "block";
 }
 </script>
 </body>
