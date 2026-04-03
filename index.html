@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>中考志愿评估</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui, sans-serif}
+body{margin:0;padding:16px;background:#f4f7fa;color:#222}
+.card{background:#fff;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 10px #00000010}
+h1{font-size:22px;text-align:center;margin-top:0}
+input,select,button{width:100%;padding:14px;margin:8px 0;border-radius:12px;border:1px solid #ddd;font-size:16px}
+button{background:#007aff;color:white;border:none;font-weight:bold}
+.res{margin-top:12px;line-height:1.7}
+.safe{color:#007aff}
+.danger{color:#ff9500}
+.fail{color:#ff3b30}
+.sec{margin-top:12px;padding-top:12px;border-top:1px solid #eee}
+</style>
+</head>
+
+<body>
+<div class="card">
+<h1>广州中考志愿评估</h1>
+<p style="text-align:center">810分制 · 梯度保护</p>
+
+<select id="area">
+<option value="番禺区">番禺区</option>
+<option value="越秀区">越秀区</option>
+<option value="天河区">天河区</option>
+<option value="荔湾区">荔湾区</option>
+<option value="海珠区">海珠区</option>
+<option value="黄埔区">黄埔区</option>
+<option value="白云区">白云区</option>
+<option value="花都区">花都区</option>
+<option value="南沙区">南沙区</option>
+<option value="增城区">增城区</option>
+<option value="从化区">从化区</option>
+</select>
+
+<input type="number" id="exam1" placeholder="一模成绩">
+<input type="number" id="exam2" placeholder="二模成绩">
+<button onclick="go()">开始评估</button>
+</div>
+
+<div class="card" id="result" style="display:none">
+<div id="output"></div>
+</div>
+
+<script>
+const GRADES = [
+["第一梯度",707],["第二梯度",667],["第三梯度",627],["第四梯度",587],["第五梯度",547],["第六梯度",507],["普高线",487]
+];
+
+const SCHOOLS = {
+"番禺区":[
+["仲元中学",702],["番禺中学",667],["铁一（番禺）",710],["象贤中学",651],["番禺实验中学",627],["禺山高级中学",621]
+],
+"越秀区":[
+["华附",740],["省实",727],["执信",723],["二中",724],["铁一",717],["十六中",707]
+],
+"天河区":[
+["天外",714],["广州中学",703],["奥林匹克",663],["75中",653],["89中",642],["113中",638]
+],
+"荔湾区":[
+["广雅",719],["真光",699],["一中",665],["四中",653],["西关外国语",655]
+],
+"海珠区":[
+["六中",712],["五中",711],["南武",699],["海实",673],["97中",647]
+],
+"黄埔区":[
+["广大附中",732],["玉岩",678],["科学城",648],["广州实验",672]
+],
+"白云区":[
+["培英",707],["65中",636],["白云中学",627]
+],
+"花都区":[
+["广雅花都",718],["秀全",668],["邝维煜",646]
+],
+"南沙区":[
+["广外",736],["二中天元",663],["广大附中南沙",682],["南沙一中",627]
+],
+"增城区":[
+["增城中学",665],["郑中钧",627],["新塘中学",624]
+],
+"从化区":[
+["从化中学",609],["六中从化",677],["从化二中",608]
+]
+};
+
+function getG(s){
+for(let [n,l] of GRADES) if(s>=l) return n; return "低于普高线";
+}
+
+function go(){
+let a = document.getElementById("area").value;
+let e1 = +document.getElementById("exam1").value;
+let e2 = +document.getElementById("exam2").value;
+let score = Math.round((e1*0.4+e2*0.6)*10)/10;
+let g = getG(score);
+
+let list = SCHOOLS[a].slice(0,6);
+let s=[],d=[],f=[];
+
+for(let [n,l] of list){
+let df = score-l;
+let t = `• ${n}（${getG(l)}）线${l} → ${df>=0?"超"+df.toFixed(1):"差"+(-df).toFixed(1)}分`;
+if(df>=0)s.push(t);
+else if(df>=-15)d.push(t);
+else f.push(t);
+}
+
+let out = `<b>优先区：${a}</b><br>预估分：${score} 分<br>梯度：${g}<br>`;
+if(s.length)out+=`<div class=sec class=safe><b>✅ 稳妥保底</b><br>${s.join('<br>')}</div>`;
+if(d.length)out+=`<div class=sec class=danger><b>⚠️ 适合冲刺</b><br>${d.join('<br>')}</div>`;
+if(f.length)out+=`<div class=sec class=fail><b>❌ 风险较大</b><br>${f.join('<br>')}</div>`;
+
+document.getElementById("output").innerHTML=out;
+document.getElementById("result").style.display="block";
+}
+</script>
+</body>
+</html>
